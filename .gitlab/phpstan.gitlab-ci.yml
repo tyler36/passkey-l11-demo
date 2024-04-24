@@ -1,0 +1,13 @@
+phpstan:
+  stage: lint
+  script:
+    - vendor/bin/phpstan analyse --memory-limit=4G --error-format gitlab > storage/logs/phpstan.json
+    - vendor/bin/phpstan analyse --memory-limit=4G --error-format=junit > storage/logs/phpstan-junit.xml
+  artifacts:
+    when: always
+    paths:
+      - storage/logs/phpstan.json
+      - storage/logs/phpstan-junit.xml
+    reports:
+      codequality: storage/logs/phpstan.json
+      junit: storage/logs/phpstan-junit.xml

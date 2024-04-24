@@ -1,0 +1,26 @@
+include:
+  - local: .gitlab/phpstan.gitlab-ci.yml
+
+variables:
+  PHP_VERSION: '8.2'
+
+stages:
+  - build
+  - lint
+
+default:
+  image: "php:$PHP_VERSION-cli"
+  interruptible: true
+  cache:
+    key:
+      files:
+        - composer.lock
+    paths:
+      - vendor/
+  before_script:
+    - apt-get update -yqq
+    - apt-get install -yqq curl zip unzip
+    # Install and run Composer
+    - curl --show-error --silent "https://getcomposer.org/installer" | php
+    - php composer.phar install --prefer-dist
+
