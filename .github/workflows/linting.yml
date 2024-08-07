@@ -9,7 +9,7 @@ on:
 
 jobs:
   linting:
-    name: "🧹 PHPSTAN"
+    name: "🧹 linting"
     runs-on: ubuntu-latest
     steps:
       - name: "☁️ checkout repository"
