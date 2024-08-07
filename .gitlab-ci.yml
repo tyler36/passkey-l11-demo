@@ -24,3 +24,18 @@ default:
     - curl --show-error --silent "https://getcomposer.org/installer" | php
     - php composer.phar install --prefer-dist
 
+phpcs:
+  stage: linting
+  image: registry.gitlab.com/pipeline-components/php-codesniffer:latest
+  script: |
+    set +euo pipefail  # don't abort if any following command fails
+    phpcs -q --report=junit > logs/phpcs-junit.xml
+    phpcs -q --report=json > logs/phpcs.json
+  artifacts:
+    when: always
+    paths:
+      - logs/phpcs-junit.xml
+      - logs/phpcs.json
+    reports:
+      junit: logs/phpcs-junit.xml
+      codequality: logs/phpcs.json

@@ -8,7 +8,7 @@ on:
     branches: [main]
 
 jobs:
-  phpstan:
+  linting:
     name: "🧹 PHPSTAN"
     runs-on: ubuntu-latest
     steps:
@@ -21,3 +21,8 @@ jobs:
           REQUIRE_DEV: true
         with:
           args: analyse
+
+      - name: "🧹 Run PHPCS"
+        uses: guix77/phpcs-drupal-action@php8.3
+        with:
+          memory_limit: 512M
