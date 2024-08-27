@@ -19,14 +19,14 @@ jobs:
       - name: "☁️ checkout repository"
         uses: actions/checkout@v4
 
-      - name: "🧹 Run PHPStan Static Analysis"
+      - name: "🧹 PHP-CS-Fixer"
+        uses: docker://oskarstark/php-cs-fixer-ga
+        with:
+          args: --config=.php-cs-fixer.dist.php
+
+      - name: "🧹 PHPStan Static Analysis"
         uses: docker://oskarstark/phpstan-ga
         env:
           REQUIRE_DEV: true
         with:
           args: analyse
-
-      - name: "🧹 Run PHPCS"
-        uses: guix77/phpcs-drupal-action@php8.3
-        with:
-          memory_limit: 512M
