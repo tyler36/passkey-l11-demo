@@ -46,5 +46,4 @@ return (new Config())
         'yoda_style' => false,
     ])
     ->setRiskyAllowed(true)
-    ->setParallelConfig(PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect())
     ->setFinder($finder);

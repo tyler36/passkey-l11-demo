@@ -11,6 +11,8 @@ concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   linting:
     name: "🧹 linting"
@@ -18,14 +20,16 @@ jobs:
     steps:
       - name: "☁️ checkout repository"
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: "🧹 PHP-CS-Fixer"
-        uses: docker://oskarstark/php-cs-fixer-ga
+        uses: docker://oskarstark/php-cs-fixer-ga:latest
         with:
           args: --config=.php-cs-fixer.dist.php
 
       - name: "🧹 PHPStan Static Analysis"
-        uses: docker://oskarstark/phpstan-ga
+        uses: docker://oskarstark/phpstan-ga:latest
         env:
           REQUIRE_DEV: true
         with:
