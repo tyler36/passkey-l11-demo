@@ -26,13 +26,21 @@ document.addEventListener('alpine:init', () => {
         validateStatus: (status) => [200, 422].includes(status)
       });
 
+
       // CHECK: Validation failed so exit early.
       if (options.status === 422) {
         this.errors = options.data.errors;
         return;
       }
 
-      const passkey = await startRegistration(options.data)
+      let passkey;
+      try {
+        // Catch 'cancel' events and timeouts.
+        passkey = await startRegistration(options.data);
+      } catch (error) {
+        this.errors = { name: ['Passkey creation failed. Please try again.']};
+        return;
+      }
 
       form.addEventListener('formdata', ({formData}) => {
         // Mutate 'passkey' data
