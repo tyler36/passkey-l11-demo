@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Session;
 use Str;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
+use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialUserEntity;
 
@@ -45,5 +46,21 @@ class PasskeyController extends Controller
         Session::flash('passkey-registration-options', $options);
 
         return $options;
+    }
+
+    public function authenticateOptions()
+    {
+
+        $options = new PublicKeyCredentialRequestOptions(
+            challenge: Str::random(),
+            // Relying party ID
+            rpId: parse_url(config('app.url'), PHP_URL_HOST),
+        );
+
+        // Temporarily store options in session to allow access to them.
+        Session::flash('passkey-authentication-options', $options);
+
+        return $options;
+
     }
 }

@@ -1,7 +1,7 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
-import {browserSupportsWebAuthn, startRegistration} from '@simplewebauthn/browser';
+import {browserSupportsWebAuthn, startAuthentication, startRegistration} from '@simplewebauthn/browser';
 
 window.Alpine = Alpine;
 
@@ -48,6 +48,13 @@ document.addEventListener('alpine:init', () => {
       })
 
       form.submit()
+    }
+  }))
+
+  Alpine.data('authenticatePasskey', () => ({
+    async authenticate() {
+      const options = await axios.get('/api/passkeys/authenticate')
+      const answer = await startAuthentication(options.data)
     }
   }))
 })
