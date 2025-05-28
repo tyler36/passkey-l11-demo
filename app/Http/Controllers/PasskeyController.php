@@ -52,11 +52,12 @@ class PasskeyController extends Controller
              */
             $passkeyOptions = Session::get('passkey-registration-options');
 
-            $publicKeyCredentialSource = AuthenticatorAttestationResponseValidator::create()->check(
-                authenticatorAttestationResponse: $publicKeyCredential->response,
-                publicKeyCredentialCreationOptions: $passkeyOptions,
-                request: $request->getHost(),
-            );
+            $publicKeyCredentialSource = AuthenticatorAttestationResponseValidator::create((new CeremonyStepManagerFactory())->creationCeremony())
+                ->check(
+                    authenticatorAttestationResponse: $publicKeyCredential->response,
+                    publicKeyCredentialCreationOptions: $passkeyOptions,
+                    host: $request->getHost(),
+                );
 
         } catch (Throwable $th) {
             throw ValidationException::withMessages([
