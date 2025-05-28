@@ -1,7 +1,7 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
-import {startRegistration} from '@simplewebauthn/browser';
+import {browserSupportsWebAuthn, startRegistration} from '@simplewebauthn/browser';
 
 window.Alpine = Alpine;
 
@@ -9,9 +9,15 @@ document.addEventListener('alpine:init', () => {
   Alpine.data('registerPasskey', () => ({
     name: '',
     errors: null,
+    browserSupportsWebAuthn,
 
     async register(form) {
       this.errors = null
+
+      // CHECK: Return early if browser does NOT support WebAuthn
+      if (! this.browserSupportsWebAuthn()) {
+        return;
+      }
 
       // Get the Passkeys options via API.
       const options =  await axios.get('/api/passkeys/register', {

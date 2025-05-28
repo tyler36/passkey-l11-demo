@@ -15,6 +15,7 @@
     <form
         x-data="registerPasskey"
         x-on:submit.prevent="register($el)"
+        x-show="browserSupportsWebAuthn()"
         name="createPasskey"
         method="post"
         action="{{ route('passkeys.store') }}"
