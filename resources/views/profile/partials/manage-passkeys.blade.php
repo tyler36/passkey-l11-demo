@@ -53,7 +53,7 @@
 
                     <form
                         method="post"
-                        action="{{ route('passkey.destroy', $passkey) }}"
+                        action="{{ route('passkeys.destroy', $passkey) }}"
                     >
                         @csrf
                         @method('DELETE')
