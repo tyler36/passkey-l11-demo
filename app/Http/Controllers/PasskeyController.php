@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Passkey;
+use App\Support\JsonSerializer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,12 +11,11 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Throwable;
-use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
-use Webauthn\Denormalizer\WebauthnSerializerFactory;
+use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
 
@@ -34,12 +34,8 @@ class PasskeyController extends Controller
 
         /**
          * De-serialize the passkey as credentials.
-         *
-         * @var PublicKeyCredential $publicKeyCredential
          */
-        $publicKeyCredential = (new WebauthnSerializerFactory(AttestationStatementSupportManager::create()))
-            ->create()
-            ->deserialize($data['passkey'], PublicKeyCredential::class, 'json');
+        $publicKeyCredential = JsonSerializer::deserialize($data['passkey'], PublicKeyCredential::class);
 
         // Ensure response is a registration response.
         if (!$publicKeyCredential->response instanceof AuthenticatorAttestationResponse) {
@@ -56,11 +52,12 @@ class PasskeyController extends Controller
              */
             $passkeyOptions = Session::get('passkey-registration-options');
 
-            $publicKeyCredentialSource = AuthenticatorAttestationResponseValidator::create()->check(
-                authenticatorAttestationResponse: $publicKeyCredential->response,
-                publicKeyCredentialCreationOptions: $passkeyOptions,
-                request: $request->getHost(),
-            );
+            $publicKeyCredentialSource = AuthenticatorAttestationResponseValidator::create((new CeremonyStepManagerFactory())->creationCeremony())
+                ->check(
+                    authenticatorAttestationResponse: $publicKeyCredential->response,
+                    publicKeyCredentialCreationOptions: $passkeyOptions,
+                    host: $request->getHost(),
+                );
 
         } catch (Throwable $th) {
             throw ValidationException::withMessages([
@@ -90,9 +87,7 @@ class PasskeyController extends Controller
          *
          * @var PublicKeyCredential $publicKeyCredential
          */
-        $publicKeyCredential = (new WebauthnSerializerFactory(AttestationStatementSupportManager::create()))
-            ->create()
-            ->deserialize($data['answer'], PublicKeyCredential::class, 'json');
+        $publicKeyCredential = JsonSerializer::deserialize($data['answer'], PublicKeyCredential::class);
 
         $passkey = Passkey::firstWhere('credential_id', $publicKeyCredential->rawId);
         if (!$passkey) {
@@ -105,13 +100,14 @@ class PasskeyController extends Controller
         }
 
         try {
-            $publicKeyCredentialSource = AuthenticatorAssertionResponseValidator::create()->check(
-                credentialId: $passkey->data,
-                authenticatorAssertionResponse: $publicKeyCredential->response,
-                publicKeyCredentialRequestOptions: Session::get('passkey-authentication-options'),
-                request: $request->getHost(),
-                userHandle: null
-            );
+            $publicKeyCredentialSource = AuthenticatorAssertionResponseValidator::create((new CeremonyStepManagerFactory())->requestCeremony())
+                ->check(
+                    publicKeyCredentialSource: $passkey->data,
+                    authenticatorAssertionResponse: $publicKeyCredential->response,
+                    publicKeyCredentialRequestOptions: Session::get('passkey-authentication-options'),
+                    host: $request->getHost(),
+                    userHandle: null
+                );
 
         } catch (Throwable $th) {
             throw ValidationException::withMessages([
