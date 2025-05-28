@@ -72,7 +72,6 @@ class PasskeyController extends Controller
         // Save passkey
         $request->user()->passkeys()->create([
             'name' => $data['name'],
-            'credential_id' => $publicKeyCredentialSource->publicKeyCredentialId,
             'data' => $publicKeyCredentialSource,
         ]);
 
