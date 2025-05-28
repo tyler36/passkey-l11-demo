@@ -1,0 +1,10 @@
+##ddev-generated
+global:
+  scrape_interval: 5s  # How often Prometheus scrapes data
+
+scrape_configs:
+
+# Scrape config files specifies a list of globs. Scrape configs are read from
+# all matching files and appended to the list of scrape configs.
+scrape_config_files:
+  - 'scrape-*.yml'

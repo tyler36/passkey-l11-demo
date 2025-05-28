@@ -1,0 +1,17 @@
+##ddev-generated
+services:
+  mysql-exporter:
+    container_name: ddev-${DDEV_SITENAME}-mysql-exporter
+    image: prom/mysqld-exporter:latest
+    # These labels ensure this service is discoverable by ddev.
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+    volumes:
+    - ".:/mnt/ddev_config"
+    - "ddev-global-cache:/mnt/ddev-global-cache"
+    - "./site-metrics/mysql-exporter/.my.cnf:/opt/mysqld_exporter/.my.cnf"
+    command:
+    - "--config.my-cnf=/opt/mysqld_exporter/.my.cnf"
+    environment:
+      - HTTP_EXPOSE=9104:9104

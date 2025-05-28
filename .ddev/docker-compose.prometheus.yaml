@@ -1,0 +1,15 @@
+##ddev-generated
+services:
+    prometheus:
+      container_name: ddev-${DDEV_SITENAME}-prometheus
+      image: prom/prometheus:latest
+      volumes:
+        - "./prometheus/:/etc/prometheus/"
+        - ".:/mnt/ddev_config"
+        - "ddev-global-cache:/mnt/ddev-global-cache"
+      labels:
+        com.ddev.site-name: ${DDEV_SITENAME}
+        com.ddev.approot: $DDEV_APPROOT
+      environment:
+        - VIRTUAL_HOST=$DDEV_HOSTNAME
+        - HTTPS_EXPOSE=${PROMETHEUS_HTTPS_PORT:-9090}:9090

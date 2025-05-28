@@ -1,0 +1,12 @@
+##ddev-generated
+apiVersion: 1
+
+datasources:
+- name: Loki
+  uid: loki
+  type: loki
+  access: proxy
+  url: http://grafana-loki:3100
+  basicAuth: false
+  isDefault: false
+  editable: false

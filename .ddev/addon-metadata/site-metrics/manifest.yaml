@@ -1,0 +1,42 @@
+name: site-metrics
+repository: tyler36/ddev-site-metrics
+version: v0.5.3
+install_date: "2025-05-28T17:49:01+09:00"
+project_files:
+    - commands/host/prometheus
+    - grafana/dashboards
+    - grafana/datasources/ddev-mysql.yml
+    - grafana/datasources/ddev-postgres.yml
+    - grafana/datasources/ddev-prometheus.yml
+    - prometheus/prometheus.yml
+    - commands/host/grafana
+    - docker-compose.prometheus.yaml
+    - docker-compose.grafana.yaml
+    - docker-compose.grafana-loki.yaml
+    - grafana/datasources/ddev-loki.yml
+    - loki/local-config.yaml
+    - prometheus/scrape-grafana-loki.yml
+    - docker-compose.grafana-alloy.yaml
+    - alloy
+    - commands/host/alloy
+    - prometheus/scrape-grafana-alloy.yml
+    - docker-compose.grafana-tempo.yaml
+    - grafana/datasources/ddev-tempo.yml
+    - prometheus/scrape-grafana-tempo.yml
+    - tempo/tempo-config.yaml
+    - docker-compose.nginx-exporter.yaml
+    - nginx_full/stub_status.conf
+    - grafana/dashboards/nginx.json
+    - prometheus/scrape-nginx-exporter.yml
+    - docker-compose.mysql-exporter.yaml
+    - grafana/dashboards/mysql.json
+    - prometheus/scrape-mysql-exporter.yml
+    - site-metrics/mysql-exporter/.my.cnf
+    - docker-compose.postgres-exporter.yaml
+    - grafana/dashboards/postgres.json
+    - prometheus/scrape-postgres-exporter.yml
+    - docker-compose.node-exporter.yaml
+    - grafana/dashboards/node.json
+    - prometheus/scrape-node-exporter.yml
+global_files: []
+removal_actions: []

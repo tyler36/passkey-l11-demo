@@ -1,0 +1,93 @@
+// ##ddev-generated
+
+otelcol.receiver.otlp "default" {
+  http {
+    endpoint="grafana-alloy:4318"
+  }
+
+  output {
+    traces  = [otelcol.processor.batch.default.input]
+  }
+}
+
+/**
+ * 'otelcol.processor.batch' accepts telemetry data from other otelcol components and places them into batches.
+ * @See https://grafana.com/docs/alloy/latest/reference/components/otelcol/otelcol.processor.batch/
+ */
+otelcol.processor.batch "default" {
+  output {
+    traces  = [otelcol.connector.spanlogs.default.input, otelcol.exporter.otlphttp.tempo.input]
+  }
+}
+
+/**
+ * 'otelcol.connector.spanlogs' accepts traces telemetry data from other otelcol components and outputs logs telemetry data for each span, root, or process.
+ * @See https://grafana.com/docs/alloy/latest/reference/components/otelcol/otelcol.connector.spanlogs/
+ */
+otelcol.connector.spanlogs "default" {
+  roots              = true
+  spans              = true
+  events             = true
+  labels             = ["srv", "tid"]
+  event_attributes   = ["log.severity", "log.message"]
+
+  overrides {
+    service_key = "srv"
+  }
+
+  output {
+    logs = [otelcol.processor.attributes.default.input]
+  }
+}
+
+/*
+ * 'otelcol.processor.attributes' accepts telemetry data from other otelcol components and modifies attributes of a span, log, or metric.
+ * @See https://grafana.com/docs/alloy/latest/reference/components/otelcol/otelcol.processor.attributes/
+ */
+otelcol.processor.attributes "default" {
+  // Extract app name from service.name attribute
+  action {
+    key = "service.name"
+    from_attribute = "srv"
+    action = "upsert"
+  }
+
+  // Extract app name from service.name attribute
+  action {
+    key = "app"
+    from_attribute = "service.name"
+    action = "upsert"
+  }
+
+  // Extract app name from service.name attribute
+  action {
+    key = "app"
+    from_attribute = "service.name"
+    action = "upsert"
+  }
+
+  // Generate loki labels from OpenTelemetry attributes
+  action {
+    key = "loki.attribute.labels"
+    action = "insert"
+    value = "service.name,app"  // comma separated list
+  }
+
+  output {
+    logs = [otelcol.exporter.loki.default.input]
+  }
+}
+
+otelcol.exporter.loki "default" {
+  forward_to = [loki.write.default.receiver]
+}
+
+otelcol.exporter.otlphttp "tempo" {
+    client {
+        endpoint = "http://grafana-tempo:4318"
+        tls {
+            insecure             = true
+            insecure_skip_verify = true
+        }
+    }
+}
