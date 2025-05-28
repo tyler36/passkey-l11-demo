@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Passkey;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @internal
+ */
 class ProfileTest extends TestCase
 {
     use RefreshDatabase;
@@ -95,5 +99,50 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_a_user_can_delete_their_passkey(): void
+    {
+        /** @var User */
+        $user = User::factory()
+            ->has(Passkey::factory())
+            ->create();
+
+        $this->assertCount(1, $user->passkeys);
+
+        /** @var Passkey */
+        $passkey = $user->passkeys()->first();
+
+        $response = $this
+            ->actingAs($user)
+            ->from('/profile')
+            ->delete("/passkeys/{$passkey->id}");
+
+        $this->assertCount(0, $user->refresh()->passkeys);
+    }
+
+    public function test_a_user_can_not_delete_another_users_passkey(): void
+    {
+        /** @var User */
+        $user = User::factory()
+            ->create();
+
+        $someone = User::factory()
+            ->has(Passkey::factory())
+            ->create();
+
+        $this->assertCount(1, $someone->passkeys);
+
+        /** @var Passkey */
+        $passkey = $someone->passkeys()->first();
+
+        $response = $this
+            ->actingAs($user)
+            ->from('/profile')
+            ->delete("/passkeys/{$passkey->id}");
+
+        $response->assertStatus(403);
+
+        $this->assertCount(1, $someone->refresh()->passkeys);
     }
 }
