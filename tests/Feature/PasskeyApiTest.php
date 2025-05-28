@@ -23,6 +23,7 @@ class PasskeyApiTest extends TestCase
                 'rp' => ['name', 'id'],
                 'user' => ['name', 'id', 'displayName'],
                 'challenge',
+                'authenticatorSelection'
             ])
             ->assertJsonFragment([
                 'rp' => [

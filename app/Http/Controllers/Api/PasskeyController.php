@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Str;
+use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialUserEntity;
@@ -31,6 +32,12 @@ class PasskeyController extends Controller
             ),
             // Challenge isn't used in the registration, but is still required.
             challenge: Str::random(),
+            authenticatorSelection: new AuthenticatorSelectionCriteria(
+                // Allow user to determine what kind of passkey to generate.
+                authenticatorAttachment: AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_NO_PREFERENCE,
+                // Store some user information in the options to improve workflow.
+                requireResidentKey: true,
+            )
         );
 
         return $options;
