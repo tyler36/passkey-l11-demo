@@ -4,7 +4,6 @@ namespace App\Support;
 
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\Denormalizer\WebauthnSerializerFactory;
-use Webauthn\PublicKeyCredential;
 
 /**
  * Class JsonSerializer.
@@ -15,10 +14,17 @@ class JsonSerializer
     {
         return (new WebauthnSerializerFactory(AttestationStatementSupportManager::create()))
             ->create()
-            ->deserialize($data, 'json');
+            ->serialize($data, 'json');
     }
 
-    public static function deserialize(string $json, string $into): PublicKeyCredential
+    /**
+     * @template TReturn
+     *
+     * @param class-string<TReturn> $into
+     *
+     * @return TReturn
+     */
+    public static function deserialize(string $json, string $into): mixed
     {
         return (new WebauthnSerializerFactory(AttestationStatementSupportManager::create()))
             ->create()

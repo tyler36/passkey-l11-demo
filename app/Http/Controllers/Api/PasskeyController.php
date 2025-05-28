@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Passkey;
+use App\Support\JsonSerializer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Str;
-use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
@@ -16,7 +16,7 @@ use Webauthn\PublicKeyCredentialUserEntity;
 
 class PasskeyController extends Controller
 {
-    public function registerOptions(Request $request): PublicKeyCredentialCreationOptions
+    public function registerOptions(Request $request)
     {
         $options = new PublicKeyCredentialCreationOptions(
             // Relying party defines the app that uses the passkey.
@@ -41,7 +41,7 @@ class PasskeyController extends Controller
         // Temporarily store options in session to allow access to them.
         Session::flash('passkey-registration-options', $options);
 
-        return $options;
+        return JsonSerializer::serialize($options);
     }
 
     public function authenticateOptions(Request $request)
@@ -63,7 +63,8 @@ class PasskeyController extends Controller
         // Temporarily store options in session to allow access to them.
         Session::flash('passkey-authentication-options', $options);
 
-        return $options;
+
+        return JsonSerializer::serialize($options);
 
     }
 }

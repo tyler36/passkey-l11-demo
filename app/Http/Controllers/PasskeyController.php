@@ -11,12 +11,11 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Throwable;
-use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
-use Webauthn\Denormalizer\WebauthnSerializerFactory;
+use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
 
@@ -35,8 +34,6 @@ class PasskeyController extends Controller
 
         /**
          * De-serialize the passkey as credentials.
-         *
-         * @var PublicKeyCredential $publicKeyCredential
          */
         $publicKeyCredential = JsonSerializer::deserialize($data['passkey'], PublicKeyCredential::class);
 
@@ -102,13 +99,14 @@ class PasskeyController extends Controller
         }
 
         try {
-            $publicKeyCredentialSource = AuthenticatorAssertionResponseValidator::create()->check(
-                credentialId: $passkey->data,
-                authenticatorAssertionResponse: $publicKeyCredential->response,
-                publicKeyCredentialRequestOptions: Session::get('passkey-authentication-options'),
-                request: $request->getHost(),
-                userHandle: null
-            );
+            $publicKeyCredentialSource = AuthenticatorAssertionResponseValidator::create((new CeremonyStepManagerFactory())->requestCeremony())
+                ->check(
+                    publicKeyCredentialSource: $passkey->data,
+                    authenticatorAssertionResponse: $publicKeyCredential->response,
+                    publicKeyCredentialRequestOptions: Session::get('passkey-authentication-options'),
+                    host: $request->getHost(),
+                    userHandle: null
+                );
 
         } catch (Throwable $th) {
             throw ValidationException::withMessages([
