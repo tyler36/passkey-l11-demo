@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Passkey;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Str;
@@ -10,6 +11,7 @@ use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
+use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 
 class PasskeyController extends Controller
@@ -48,13 +50,20 @@ class PasskeyController extends Controller
         return $options;
     }
 
-    public function authenticateOptions()
+    public function authenticateOptions(Request $request)
     {
+        $allowedCredentials = $request->filled('email')
+            ? Passkey::whereRelation('user', 'email', $request->email)
+                ->get()
+                ->map(fn (Passkey $passkey) => $passkey->data())
+                ->map(fn (PublicKeyCredentialSource $publicKeyCredentialSource) => $publicKeyCredentialSource->getPublicKeyCredentialDescriptor())
+            : [];
 
         $options = new PublicKeyCredentialRequestOptions(
             challenge: Str::random(),
             // Relying party ID
             rpId: parse_url(config('app.url'), PHP_URL_HOST),
+            allowCredentials: $allowedCredentials
         );
 
         // Temporarily store options in session to allow access to them.

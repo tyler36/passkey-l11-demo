@@ -52,9 +52,26 @@ document.addEventListener('alpine:init', () => {
   }))
 
   Alpine.data('authenticatePasskey', () => ({
-    async authenticate(form) {
-      const options = await axios.get('/api/passkeys/authenticate')
-      const answer = await startAuthentication(options.data)
+    showPasswordField: false,
+    email: '',
+
+    async authenticate(form, manualSubmission = false ) {
+      if (this.showPasswordField) {
+        return form.submit()
+      }
+
+      let answer
+
+      try {
+        const options = await axios.get('/api/passkeys/authenticate', {
+          params: {email: this.email}
+        })
+        answer = await startAuthentication(options.data)
+      } catch (error) {
+          this.showPasswordField = true;
+
+        return
+      }
 
       form.action = '/passkeys/authenticate'
       form.addEventListener('formdata', ({formData}) => {
