@@ -3,9 +3,5 @@ parameters:
     - app/
     - database/
     - tests/
-  level: 9
+  level: 4
   ignoreErrors:
-    -
-      message: "#^Class App\\\\Models\\\\User uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-      count: 1
-      path: app/Models/User.php
