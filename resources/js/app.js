@@ -52,7 +52,7 @@ document.addEventListener('alpine:init', () => {
   }))
 
   Alpine.data('authenticatePasskey', () => ({
-    showPasswordField: false,
+    showPasswordField: !browserSupportsWebAuthn(),
     email: '',
 
     async authenticate(form, manualSubmission = false ) {
