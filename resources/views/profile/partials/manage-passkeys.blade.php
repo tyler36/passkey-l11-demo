@@ -37,6 +37,7 @@
                 :messages="$errors->createPasskey->get('name')"
                 class="mt-2"
             />
+            <x-alpine-input-error messages="errors?.name" />
         </div>
 
         <div class="flex items-center gap-4">
