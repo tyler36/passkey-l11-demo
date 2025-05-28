@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Passkey;
+use App\Support\JsonSerializer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,9 +38,7 @@ class PasskeyController extends Controller
          *
          * @var PublicKeyCredential $publicKeyCredential
          */
-        $publicKeyCredential = (new WebauthnSerializerFactory(AttestationStatementSupportManager::create()))
-            ->create()
-            ->deserialize($data['passkey'], PublicKeyCredential::class, 'json');
+        $publicKeyCredential = JsonSerializer::deserialize($data['passkey'], PublicKeyCredential::class);
 
         // Ensure response is a registration response.
         if (!$publicKeyCredential->response instanceof AuthenticatorAttestationResponse) {
@@ -90,9 +89,7 @@ class PasskeyController extends Controller
          *
          * @var PublicKeyCredential $publicKeyCredential
          */
-        $publicKeyCredential = (new WebauthnSerializerFactory(AttestationStatementSupportManager::create()))
-            ->create()
-            ->deserialize($data['answer'], PublicKeyCredential::class, 'json');
+        $publicKeyCredential = JsonSerializer::deserialize($data['answer'], PublicKeyCredential::class);
 
         $passkey = Passkey::firstWhere('credential_id', $publicKeyCredential->rawId);
         if (!$passkey) {
