@@ -6,6 +6,15 @@ use App\Models\Passkey;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\ValidationException;
+use Webauthn\AttestationStatement\AttestationStatementSupportManager;
+use Webauthn\AuthenticatorAssertionResponseValidator;
+use Webauthn\AuthenticatorAttestationResponse;
+use Webauthn\AuthenticatorAttestationResponseValidator;
+use Webauthn\Denormalizer\WebauthnSerializerFactory;
+use Webauthn\PublicKeyCredential;
+use Webauthn\PublicKeyCredentialCreationOptions;
 
 class PasskeyController extends Controller
 {
@@ -30,7 +39,54 @@ class PasskeyController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Check 'passkey' contains valid data.
+        $data = $request->validateWithBag('createPasskey', [
+            'name' => ['required', 'string', 'max:255'],
+            'passkey' => ['required', 'json'],
+        ]);
+
+        /**
+         * De-serialize the passkey as credentials.
+         * @var PublicKeyCredential $publicKeyCredential
+         */
+        $publicKeyCredential = (new WebauthnSerializerFactory(AttestationStatementSupportManager::create()))
+            ->create()
+            ->deserialize($data['passkey'], PublicKeyCredential::class, 'json');
+
+        // Ensure response is a registration response.
+        if (!$publicKeyCredential->response instanceof AuthenticatorAttestationResponse) {
+            return to_route('login');
+        }
+
+        try {
+            /**
+             * Get options back from session.
+             * @see PasskeyApiController::registerOptions().
+             *
+             * @var PublicKeyCredentialCreationOptions $passkeyOptions
+             */
+            $passkeyOptions = Session::get('passkey-registration-options');
+
+            $publicKeyCredentialSource = AuthenticatorAttestationResponseValidator::create()->check(
+                authenticatorAttestationResponse: $publicKeyCredential->response,
+                publicKeyCredentialCreationOptions: $passkeyOptions,
+                request: $request->getHost(),
+            );
+
+        } catch (\Throwable $th) {
+            throw ValidationException::withMessages([
+                'name' => 'The given passkey is invalid'
+            ])->errorBag(errorBag: 'createPasskey');
+        }
+
+        // Save passkey
+        $request->user()->passkeys()->create([
+            'name' => $data['name'],
+            'credential_id' => $publicKeyCredentialSource->publicKeyCredentialId,
+            'data' => $publicKeyCredentialSource
+        ]);
+
+        return to_route('profile.edit')->withFragment('managePasskeys');
     }
 
     /**

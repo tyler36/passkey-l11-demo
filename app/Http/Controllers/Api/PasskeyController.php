@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Str;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
@@ -26,7 +27,7 @@ class PasskeyController extends Controller
                 // A unique ID for the the user, typically their email.
                 name: $request->user()->email,
                 // The internal id. This should not include any identifiable information.
-                id: strval($request->user()->id),
+                id: (string) ($request->user()->id),
                 // A user-friendly name to display.
                 displayName: $request->user()->name,
             ),
@@ -39,6 +40,9 @@ class PasskeyController extends Controller
                 requireResidentKey: true,
             )
         );
+
+        // Temporarily store options in session to allow access to them.
+        Session::flash('passkey-registration-options', $options);
 
         return $options;
     }

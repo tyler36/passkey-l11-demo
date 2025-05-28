@@ -58,3 +58,9 @@ $table->json('data');
 
     This will automatically be turned to JSON by Laravel.
     Webauthn re-encodes `user->id` as base64-url to keep anonymous.
+
+### Storing
+
+1. App.js uses the `PublicKeyCredentialCreationOptions` to trigger the `startRegistration` process generates the passkey.
+1. Registration object is attached to the form and sent to `PasskeyController::store`
+1. `PasskeyController::store` validates it as `AuthenticatorAttestationResponse` and creates the credentials, and save it.

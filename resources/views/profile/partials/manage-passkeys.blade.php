@@ -14,10 +14,10 @@
 
     <form
         x-data="registerPasskey"
-        x-on:submit.prevent="register()"
+        x-on:submit.prevent="register($el)"
         name="createPasskey"
         method="post"
-        action="/"
+        action="{{ route('passkeys.store') }}"
         class="mt-6 space-y-6"
     >
         @csrf
@@ -30,6 +30,7 @@
             <x-text-input
                 id="create_passkey_passkey_name"
                 name="name"
+                x-model="name"
                 class="mt-1 block w-full"
             />
             <x-input-error

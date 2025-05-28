@@ -11,6 +11,12 @@ class Passkey extends Model
     /** @use HasFactory<\Database\Factories\PasskeyFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'credential_id',
+        'data'
+    ];
+
     /**
      * RELATIONSHIP: Belongs to a User.
      */
