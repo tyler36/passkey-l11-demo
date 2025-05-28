@@ -11,6 +11,8 @@ The stack is:
 - PHPUnit
 - Breeze starter-kit
 
+NOTE: Passkeys only works over HTTPS.
+
 ## Database
 
 Passkey model:

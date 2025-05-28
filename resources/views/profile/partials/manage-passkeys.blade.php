@@ -13,6 +13,8 @@
     </header>
 
     <form
+        x-data="registerPasskey"
+        x-on:submit.prevent="register()"
         name="createPasskey"
         method="post"
         action="/"
