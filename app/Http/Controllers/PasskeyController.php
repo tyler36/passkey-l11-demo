@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Passkey;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,7 +62,7 @@ class PasskeyController extends Controller
                 request: $request->getHost(),
             );
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             throw ValidationException::withMessages([
                 'name' => 'The given passkey is invalid',
             ])->errorBag(errorBag: 'createPasskey');
@@ -78,9 +77,9 @@ class PasskeyController extends Controller
         return to_route('profile.edit')->withFragment('managePasskeys');
     }
 
-
     // Authenticate Passkey with previously stored Passkey
-    public function authenticate(Request $request) {
+    public function authenticate(Request $request)
+    {
         // Check 'passkey' contains valid data.
         $data = $request->validate([
             'answer' => ['required', 'json'],
@@ -120,8 +119,9 @@ class PasskeyController extends Controller
             ]);
         }
 
-        Auth::loginUsingId($passkey->user_id);
+        $passkey->update(['data' => $publicKeyCredentialSource]);
 
+        Auth::loginUsingId($passkey->user_id);
         $request->session()->regenerate();
 
         return to_route('dashboard');
